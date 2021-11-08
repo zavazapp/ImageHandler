@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "com.zavazapp.imghandlerlib"
-        minSdk 29
+        minSdk 24
         targetSdk 30
         versionCode 1
         versionName "1.0"
