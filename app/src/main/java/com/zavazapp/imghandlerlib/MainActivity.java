@@ -15,7 +15,9 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
+import com.zavazapp.imagehandlerlibrary.CircleTransform;
 import com.zavazapp.imagehandlerlibrary.ImageHandler;
+import com.zavazapp.imagehandlerlibrary.RadiusRectangleTransform;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 Uri capturedImageUri = result.getUri();
                 //do whatever with image Uri.
                 //Set image view for example.
-                Picasso.get().load(capturedImageUri).into(imageView);
+                Picasso.get().load(capturedImageUri).transform(new RadiusRectangleTransform(4)).into(imageView);
             }
         }
     }
