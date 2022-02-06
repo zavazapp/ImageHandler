@@ -5,22 +5,17 @@ import static android.app.Activity.RESULT_OK;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
-import android.util.Log;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -28,21 +23,20 @@ import androidx.core.content.FileProvider;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImageHandler {
+public class ZZImageHandler {
     private Activity activity;
     public static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 101;
 
-    public ImageHandler(Activity activity) {
+    public ZZImageHandler(Activity activity) {
         this.activity = activity;
     }
 
-    public void getPicture() {
+    public void startImageChooser() {
         startCapture();
     }
 
@@ -79,7 +73,7 @@ public class ImageHandler {
     }
 
 
-    public static boolean checkAndRequestPermissions(final Activity context) {
+    private static boolean checkAndRequestPermissions(final Activity context) {
         int WExtstorePermission = ContextCompat.checkSelfPermission(context,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int cameraPermission = ContextCompat.checkSelfPermission(context,
@@ -117,14 +111,30 @@ public class ImageHandler {
     }
 
 
-    public Uri onActivityResult(int requestCode, int resultCode, Intent data, ImageView imageView) throws IOException {
+    public Uri getImageUri(int requestCode, int resultCode, Intent data) throws IOException {
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            return getCropUri(resultCode, data);
+        }else {
+            startCrop(resultCode, requestCode, data);
+        }
+        return null;
+    }
+
+    public Bitmap getBitmap(int requestCode, int resultCode, Intent data) throws IOException {
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            return getCropBitmap(resultCode, data);
+        }else {
+            startCrop(resultCode, requestCode, data);
+        }
+        return null;
+    }
+
+    private void startCrop(int resultCode, int requestCode, Intent data) throws IOException {
         if (resultCode != RESULT_CANCELED) {
             switch (requestCode) {
                 case 0:
                     if (resultCode == RESULT_OK && data != null) {
-                        Bitmap takenImage = (Bitmap) data.getExtras().get("data");
-                        Uri uri = saveFile(takenImage);
-                        return uri;
+                        CropImage.activity(saveFile((Bitmap) data.getExtras().get("data"))).start(activity);
                     }
                     break;
                 case 1:
@@ -137,20 +147,41 @@ public class ImageHandler {
                                 cursor.moveToFirst();
                                 int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
                                 String picturePath = cursor.getString(columnIndex);
-                                Bitmap selectedBitmap = BitmapFactory.decodeFile(picturePath);
-                                imageView.setImageBitmap(selectedBitmap);
+//                                Bitmap selectedBitmap = BitmapFactory.decodeFile(picturePath);
                                 cursor.close();
-                                return data.getData();
+                                CropImage.activity(selectedImage).start(activity);
                             }
                         }
                     }
                     break;
             }
         }
+    }
+
+    private Uri getCropUri(int resultCode, Intent data) {
+        CropImage.ActivityResult result = CropImage.getActivityResult(data);
+        if (resultCode == RESULT_OK) {
+            Uri resultUri = result.getUri();
+            return resultUri;
+        } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+            //DO NOTHING
+
+        }
         return null;
     }
 
-    public Uri saveFile(Bitmap bitmap) throws IOException {
+    private Bitmap getCropBitmap(int resultCode, Intent data) throws IOException {
+        CropImage.ActivityResult result = CropImage.getActivityResult(data);
+        if (resultCode == RESULT_OK) {
+            return ((Bitmap) data.getExtras().get("data"));
+        } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+            //DO NOTHING
+
+        }
+        return null;
+    }
+
+    private Uri saveFile(Bitmap bitmap) throws IOException {
         File tempFilesDir = new File(activity.getCacheDir(), "Images");
         tempFilesDir.mkdir();
 
