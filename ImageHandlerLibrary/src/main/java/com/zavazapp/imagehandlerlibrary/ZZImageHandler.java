@@ -192,7 +192,7 @@ public class ZZImageHandler {
 
         File fileToSend = new File(tempFilesDir, "cropImage.png");
 
-        return FileProvider.getUriForFile((Context) activity, "com.zavazapp.imagehandlerlibrary.fileprovider", fileToSend);
+        return FileProvider.getUriForFile((Context) activity, activity.getPackageName()+ ".fileprovider", fileToSend);
     }
 }
 
