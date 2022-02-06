@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 
@@ -13,6 +12,9 @@ import com.squareup.picasso.Transformation;
 
 
 public class RadiusRectangleTransform implements Transformation {
+    /**
+     * 1 to 10
+     */
     private int curveSize;
 
     public RadiusRectangleTransform(int curveSize) {
